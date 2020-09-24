@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<GridPane alignment="center" hgap="10" prefHeight="400.0" prefWidth="700.0" vgap="10" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ChatScreen.Controller">
+<GridPane alignment="center" hgap="10" prefHeight="400.0" prefWidth="700.0" vgap="10" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ChatScreen.ConController">
    <columnConstraints>
       <ColumnConstraints maxWidth="634.0" minWidth="628.0" prefWidth="628.0" />
       <ColumnConstraints maxWidth="11.0" minWidth="5.0" prefWidth="11.0" />
@@ -23,19 +23,25 @@
          <children>
             <Pane layoutX="314.0" layoutY="52.0" prefHeight="297.0" prefWidth="269.0" style="-fx-background-color: #5f6b3b;">
                <children>
-                  <TextField fx:id="txtfieldIPaddress" layoutX="20.0" layoutY="102.0" prefHeight="37.0" prefWidth="230.0" />
+                  <TextField fx:id="txtfieldIPaddress" layoutX="20.0" layoutY="106.0" prefHeight="37.0" prefWidth="230.0" />
                   <Button fx:id="btnConnect" layoutX="167.0" layoutY="241.0" mnemonicParsing="false" onAction="#handleSend" prefHeight="37.0" prefWidth="83.0" style="-fx-background-color: #bae33d;" text="Connect">
                      <font>
                         <Font name="Tw Cen MT" size="18.0" />
                      </font>
                   </Button>
-                  <TextField fx:id="txtfieldIPortNumber" layoutX="20.0" layoutY="167.0" prefHeight="37.0" prefWidth="230.0" />
-                  <Label fx:id="lblinstructions1" layoutX="17.0" layoutY="76.0" prefHeight="30.0" prefWidth="166.0" text="IP Address" textFill="WHITE">
+                  <TextField fx:id="txtfieldIPortNumber" layoutX="20.0" layoutY="170.0" prefHeight="37.0" prefWidth="230.0" />
+                  <Label fx:id="lblinstructions1" layoutX="14.0" layoutY="78.0" prefHeight="30.0" prefWidth="166.0" text="IP Address" textFill="WHITE">
                      <font>
                         <Font name="Tw Cen MT" size="16.0" />
                      </font>
                   </Label>
-                  <Label fx:id="lblinstructions11" layoutX="17.0" layoutY="140.0" prefHeight="30.0" prefWidth="166.0" text="Port Number" textFill="WHITE">
+                  <Label fx:id="lblinstructions11" layoutX="17.0" layoutY="143.0" prefHeight="30.0" prefWidth="166.0" text="Port Number" textFill="WHITE">
+                     <font>
+                        <Font name="Tw Cen MT" size="16.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="txtfieldName" layoutX="20.0" layoutY="41.0" prefHeight="37.0" prefWidth="230.0" />
+                  <Label fx:id="lblinstructions12" layoutX="17.0" layoutY="14.0" prefHeight="30.0" prefWidth="166.0" text="Name" textFill="WHITE">
                      <font>
                         <Font name="Tw Cen MT" size="16.0" />
                      </font>

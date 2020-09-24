@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ChatScreen.Controller">
+<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ChatScreen.CSController">
    <columnConstraints>
       <ColumnConstraints maxWidth="634.0" minWidth="628.0" prefWidth="628.0" />
       <ColumnConstraints maxWidth="11.0" minWidth="5.0" prefWidth="11.0" />
