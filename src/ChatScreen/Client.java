@@ -32,16 +32,22 @@ public class Client {
     static PrintWriter out;
     String name;
 
-    public Client(String serverAddress, String port, String name) {
-
-        int portnum = Integer.parseInt(port);
+    public Client(String serverAddress, int port, String name) {
         this.serverAddress = serverAddress;
-        this.port = portnum;
+        this.port = port;
         this.name = name;
-        this.run();
+        try {
+            Stage stage = Main.getPrimaryStage();
+            Parent root = FXMLLoader.load(getClass().getResource("chatscreen.fxml"));
+            stage.setScene(new Scene(root, 600, 600));
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
-    private void run() /*throws IOException*/ {
+    private void run() throws IOException {
         try {
             var socket = new Socket(serverAddress,port);
             in = new Scanner(socket.getInputStream());
@@ -51,20 +57,12 @@ public class Client {
                 var line = in.nextLine();
                 if (line.startsWith("SUBMITNAME")) {
                     out.println(this.name); //show connect box
-                } else if (line.startsWith("NAMEACCEPTED")) {
-                    Platform.runLater(() -> {
-                        try
-                        {
-                            Stage stage = Main.getPrimaryStage();
-                            Parent root = FXMLLoader.load(getClass().getResource("chatscreen.fxml"));
-                            stage.setScene(new Scene(root, 965, 965));
-                        }
-                        catch(IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                } else if (line.startsWith("MESSAGE")) {
-                    CSController.addMessage(line.substring(8) + "\n"); //append message to dialogue box
+                }
+                else if (line.startsWith("NAMEACCEPTED")) {
+                    System.out.println("MAMA MO 3");
+                }
+                else if (line.startsWith("MESSAGE")) {
+                    System.out.println("hello");//CSController.addMessage(line.substring(8) + "\n"); //append message to dialogue box
                 }
             }
         }
@@ -83,6 +81,12 @@ public class Client {
      */
     public static void send(String msg) throws IOException {
         out.println(msg);
-        out.flush();
+    }
+
+    public static void createClient(String ip, String port, String name)  throws Exception
+    {
+        int portnum = Integer.parseInt(port);
+        var client = new Client(ip, portnum, name);
+        client.run();
     }
 }

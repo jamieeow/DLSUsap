@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextFlow;
 
 import java.io.IOException;
 
@@ -14,8 +15,8 @@ public class CSController {
 
     @FXML Button btnImg, btnSend, btnLogout;
     @FXML TextField txtfieldInput;
-    @FXML static VBox vboxDialog;
     @FXML Label lblName;
+    @FXML static TextFlow textflow;
 
     public void initialize(){
 
@@ -29,7 +30,7 @@ public class CSController {
            }
     }
     public static void addMessage(String message){
-        vboxDialog.getChildren().add(new Text(message));
+        textflow.getChildren().add(new Text(message));
     }
 
 }

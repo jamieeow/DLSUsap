@@ -1,5 +1,3 @@
-package Server;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -30,8 +28,8 @@ public class Server {
 
     public static void main(String[] args) throws Exception {
         System.out.println("The chat server is running...");
-        var pool = Executors.newFixedThreadPool(500);
-        try (var listener = new ServerSocket(1234)) {
+        var pool = Executors.newFixedThreadPool(2);
+        try (var listener = new ServerSocket(59001)) {
             while (true) {
                 pool.execute(new Handler(listener.accept()));
             }
@@ -71,9 +69,14 @@ public class Server {
                 while (true) {
                     out.println("SUBMITNAME");
                     name = in.nextLine();
-                    if (!name.equals("") && !names.contains(name)) {
-                        names.add(name);
-                        break;
+                    if (name == null) {
+                        return;
+                    }
+                    synchronized (names) {
+                        if (!name.isBlank() && !names.contains(name)) {
+                            names.add(name);
+                            break;
+                        }
                     }
                 }
 
