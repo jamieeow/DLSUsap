@@ -100,14 +100,10 @@ public class Client {
                     }
 					else {
 						//create a temporary thread get the file and send the file
-						System.out.println("MAMA MO");
 						new Thread(new Runnable() {
 
 							public void run() {
 								try {
-
-
-									byte[] data;
 
 									long fileLength = fileToSend.length();
 									if (fileLength < 0) {
@@ -119,13 +115,9 @@ public class Client {
 
 									fileOut.writeUTF(command);
 
-									DataInputStream fileReader = new DataInputStream(new FileInputStream(new File(fileToSend.getAbsolutePath())));//reads the file from users computer
+									byte[] myByteArray = new byte[(int) fileLength];
 
-									data = new byte[(int) (fileLength)];
-
-									int read = fileReader.read(data);
-
-									fileOut.write(data, 0, read);//send to other user
+									System.out.println("INSERT SENDING HERE");
 									
 
 								} catch (FileNotFoundException fnfe) {

@@ -166,7 +166,6 @@ public class Server {
         public void run() {
             try {
 					//get the original file command from the user
-					System.out.println("MAMA MO2");
 					String command = fileIn.readUTF();
 					 
 					// break the string into message and recipient part 
@@ -193,8 +192,8 @@ public class Server {
 						System.out.println(mc.name);
 						System.out.println(username);
 					} 
-					
-					fileIn.read(tmp.getData());
+						
+					System.out.println("INSERT SERVER SIDE SENDING HERE");
 
                 //get the next command
             } catch (FileNotFoundException fnfe) {
@@ -203,7 +202,11 @@ public class Server {
                  eofe.printStackTrace();
             } catch (IOException ioe) {
 				ioe.printStackTrace();
-            }			
+            }	
+			finally{
+				new Thread(new fileReaderThread()).start();
+			}
+			
         }
     }
 	
