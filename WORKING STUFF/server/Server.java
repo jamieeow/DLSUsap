@@ -12,6 +12,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.EOFException;
+import java.util.Vector;
+import java.util.StringTokenizer;
+
 /**
  * A multithreaded chat room server. When a client connects the server requests
  * a screen name by sending the client the text "SUBMITNAME", and keeps
@@ -30,6 +33,7 @@ public class Server {
 
     // The set of all the print writers for all the clients, used for broadcast.
     private static Set<PrintWriter> writers = new HashSet<>();
+	private static Vector<Handler> fileWriters = new Vector<>(); 
 	
 	private static ServerSocket fileServer;
     private static Socket fileClient;
@@ -39,7 +43,7 @@ public class Server {
 
 
     public static void main(String[] args) throws Exception {
-        System.out.println("The chat server is running...");
+        System.out.println("The chat server is running on Port 59001...");
         var pool = Executors.newFixedThreadPool(2);
         try (var listener = new ServerSocket(59001)) {
             while (true) {
@@ -116,10 +120,9 @@ public class Server {
                 fileClient = fileServer.accept();
                 fileOut = new DataOutputStream(fileClient.getOutputStream());
                 fileIn = new DataInputStream(fileClient.getInputStream());
-
+				fileWriters.add(this);
                 //create thread to detect and store incoming files
-                new Thread(new fileReaderThread()).start();
-				
+				new Thread(new fileReaderThread()).start();
                 for (PrintWriter writer : writers) {
                     writer.println("MESSAGE " + name + " has joined");
                 }
@@ -159,35 +162,48 @@ public class Server {
 	
 	private static class fileReaderThread implements Runnable {
         //create new thread to recieve commands and file data
-
+		
         public void run() {
             try {
-                //get the original file command from the user
-                String command = fileIn.readUTF();
-                
-                //get the file size
-                int fileSize = Integer.parseInt(command.substring(command.lastIndexOf("-") + 1, command.length() - 1));
-                int dashIndex = command.indexOf("-");
-                String fileName = command.substring(dashIndex + 1, command.lastIndexOf("-"));
+					//get the original file command from the user
+					System.out.println("MAMA MO2");
+					String command = fileIn.readUTF();
+					 
+					// break the string into message and recipient part 
+					StringTokenizer st = new StringTokenizer(command, "#"); 
+					String username = st.nextToken(); 
+					command = st.nextToken(); 
+	  
+					//get the file size
+					int fileSize = Integer.parseInt(command.substring(command.lastIndexOf("-") + 1, command.length() - 1));
+					int dashIndex = command.indexOf("-");
+					String fileName = command.substring(dashIndex + 1, command.lastIndexOf("-"));
 
-               
-                //create new file object to store data
+				   
+					//create new file object to store data
 
-                //make the file object and add to list
-                file tmp = new file(fileSize, fileName);
-                //files.add(tmp);
-                //fileModel.add(fileModel.getSize(), fileName);
-                System.out.println(fileName);
-                fileIn.read(tmp.getData());
-
+					//make the file object and add to list
+					file tmp = new file(fileSize, fileName);
+					//files.add(tmp);
+					//fileModel.add(fileModel.getSize(), fileName);
+					for (Handler mc : Server.fileWriters)  
+					{ 
+						// if the recipient is found, write on its 
+					   // output stream 
+						System.out.println(mc.name);
+						System.out.println(username);
+					} 
+					
+					fileIn.read(tmp.getData());
 
                 //get the next command
             } catch (FileNotFoundException fnfe) {
-               //mainReference.error("Could not read file.");
+               fnfe.printStackTrace();
             } catch (EOFException eofe) {
-                //mainReference.error(eofe.getMessage());
+                 eofe.printStackTrace();
             } catch (IOException ioe) {
-            }
+				ioe.printStackTrace();
+            }			
         }
     }
 	

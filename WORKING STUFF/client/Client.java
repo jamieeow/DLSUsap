@@ -47,6 +47,7 @@ public class Client {
     String serverAddress;
     int ip;
     Scanner in;
+	String username;
     PrintWriter out;
     InputStream dis;
     OutputStream dos;
@@ -99,6 +100,7 @@ public class Client {
                     }
 					else {
 						//create a temporary thread get the file and send the file
+						System.out.println("MAMA MO");
 						new Thread(new Runnable() {
 
 							public void run() {
@@ -113,7 +115,7 @@ public class Client {
 									}
 
 									//send information about file name and length of file
-									String command = "\\file-" + getFileName(fileToSend.getAbsolutePath()) + "-" + fileLength + "\\";
+									String command = username + "#\\file-" + getFileName(fileToSend.getAbsolutePath()) + "-" + fileLength + "\\";
 
 									fileOut.writeUTF(command);
 
@@ -165,7 +167,8 @@ public class Client {
             while (in.hasNextLine()) {
                 var line = in.nextLine();
                 if (line.startsWith("SUBMITNAME")) {
-                    out.println(getName());
+					username = getName();
+                    out.println(username);
                 } else if (line.startsWith("NAMEACCEPTED")) {
                     this.frame.setTitle("DlSUsap - " + line.substring(13));
                     textField.setEditable(true);
