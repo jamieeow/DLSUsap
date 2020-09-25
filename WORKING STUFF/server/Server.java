@@ -187,10 +187,10 @@ public class Server {
 					//fileModel.add(fileModel.getSize(), fileName);
 					for (Handler mc : Server.fileWriters)  
 					{ 
-						// if the recipient is found, write on its 
-					   // output stream 
-						System.out.println(mc.name);
-						System.out.println(username);
+						if(!mc.name.equals(username))
+						{
+							mc.out.println("FILEACCEPT" + fileName + "from" + username);
+						}
 					} 
 						
 					System.out.println("INSERT SERVER SIDE SENDING HERE");

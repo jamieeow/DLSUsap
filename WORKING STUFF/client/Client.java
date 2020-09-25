@@ -179,6 +179,18 @@ public class Client {
 					
                 }else if (line.startsWith("MESSAGE")) {
                     messageArea.append(line.substring(8) + "\n");
+                }else if (line.startsWith("FILEACCEPT")) {
+					String sender = line.substring(11);
+                    int result = JOptionPane.showConfirmDialog(frame,"Do yo want a file?" + sender, "Swing Tester",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE);
+					if(result == JOptionPane.YES_OPTION){
+					   System.out.println("YES!");
+					}else if (result == JOptionPane.NO_OPTION){
+					   System.out.println("NO!");
+					}else {
+					   System.out.println("NO!");
+					}
                 }
             }
         }
