@@ -191,10 +191,11 @@ public class Client {
             try {
                 //get the original file command from the user
                 String sender = fileIn.readUTF();
+				//>>INSERT FILE RECEIVING HERE
 				int result = JOptionPane.showConfirmDialog(frame,"Do yo want a file?" + sender, "Swing Tester",
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 				if(result == JOptionPane.YES_OPTION){
-					fileOut.writeUTF("GiveMeFile");
+					//>>INSERT FILE SAVING HERE
 				}else if (result == JOptionPane.NO_OPTION){
 					out.println("File Transfer Failed");
 				}else {

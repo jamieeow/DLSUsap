@@ -189,7 +189,7 @@ public class Server {
 						if(!mc.name.equals(username))
 						{
 							mc.fileOut.writeUTF(fileName + "from" + username);
-							System.out.println("INSERT SERVER SIDE SENDING HERE");
+							//>>INSERT FILE SENDING HERE
 						}
 					} 
 						
