@@ -48,14 +48,12 @@ public class Client {
     int ip;
     Scanner in;
 	String username;
-    PrintWriter out;
-    InputStream dis;
-    OutputStream dos;
+    private static PrintWriter out;
 	private static Socket fileClient;
     private static int filePort;
     private static DataOutputStream fileOut;//writer to other client
     private static DataInputStream fileIn;//reader from other client
-    JFrame frame = new JFrame("Chatter");
+    static JFrame frame = new JFrame("Chatter");
     JTextField textField = new JTextField(50);
     JTextArea messageArea = new JTextArea(16, 50);
     JButton fileButton = new JButton("File Button");
@@ -115,10 +113,7 @@ public class Client {
 
 									fileOut.writeUTF(command);
 
-									byte[] myByteArray = new byte[(int) fileLength];
-
-									System.out.println("INSERT SENDING HERE");
-									
+									byte[] myByteArray = new byte[(int) fileLength];								
 
 								} catch (FileNotFoundException fnfe) {
 									//mainReference.error("Could not send file.");
@@ -154,8 +149,6 @@ public class Client {
             var socket = new Socket(serverAddress, ip);
             in = new Scanner(socket.getInputStream());
             out = new PrintWriter(socket.getOutputStream(), true);
-            dis = socket.getInputStream();
-            dos = socket.getOutputStream();
             while (in.hasNextLine()) {
                 var line = in.nextLine();
                 if (line.startsWith("SUBMITNAME")) {
@@ -179,18 +172,6 @@ public class Client {
 					
                 }else if (line.startsWith("MESSAGE")) {
                     messageArea.append(line.substring(8) + "\n");
-                }else if (line.startsWith("FILEACCEPT")) {
-					String sender = line.substring(11);
-                    int result = JOptionPane.showConfirmDialog(frame,"Do yo want a file?" + sender, "Swing Tester",
-					JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE);
-					if(result == JOptionPane.YES_OPTION){
-					   System.out.println("YES!");
-					}else if (result == JOptionPane.NO_OPTION){
-					   System.out.println("NO!");
-					}else {
-					   System.out.println("NO!");
-					}
                 }
             }
         }
@@ -209,24 +190,18 @@ public class Client {
         public void run() {
             try {
                 //get the original file command from the user
-                String command = fileIn.readUTF();
-                
-                //get the file size
-                int fileSize = Integer.parseInt(command.substring(command.lastIndexOf("-") + 1, command.length() - 1));
-                int dashIndex = command.indexOf("-");
-                String fileName = command.substring(dashIndex + 1, command.lastIndexOf("-"));
+                String sender = fileIn.readUTF();
+				int result = JOptionPane.showConfirmDialog(frame,"Do yo want a file?" + sender, "Swing Tester",
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				if(result == JOptionPane.YES_OPTION){
+					fileOut.writeUTF("GiveMeFile");
+				}else if (result == JOptionPane.NO_OPTION){
+					out.println("File Transfer Failed");
+				}else {
+					out.println("File Transfer Failed");
+				}
 
-               
-                //create new file object to store data
-
-                //make the file object and add to list
-                file tmp = new file(fileSize, fileName);
-                //files.add(tmp);
-                //fileModel.add(fileModel.getSize(), fileName);
-                
-                fileIn.read(tmp.getData());
-
-
+				System.out.println("INSERT Receiving ERE");
                 //get the next command
             } catch (FileNotFoundException fnfe) {
                //mainReference.error("Could not read file.");

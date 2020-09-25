@@ -34,12 +34,6 @@ public class Server {
     // The set of all the print writers for all the clients, used for broadcast.
     private static Set<PrintWriter> writers = new HashSet<>();
 	private static Vector<Handler> fileWriters = new Vector<>(); 
-	
-	private static ServerSocket fileServer;
-    private static Socket fileClient;
-    private static int filePort;
-    private static DataOutputStream fileOut;//writer to other client
-    private static DataInputStream fileIn;//reader from other client
 
 
     public static void main(String[] args) throws Exception {
@@ -62,6 +56,11 @@ public class Server {
         private PrintWriter out;
         private boolean image;
         private boolean text;
+		private ServerSocket fileServer;
+		private Socket fileClient;
+		private int filePort;
+		private DataOutputStream fileOut;//writer to other client
+		private static DataInputStream fileIn;//reader from other client
 
         /**
          * Constructs a handler thread, squirreling away the socket. All the interesting
@@ -166,7 +165,7 @@ public class Server {
         public void run() {
             try {
 					//get the original file command from the user
-					String command = fileIn.readUTF();
+					String command = Handler.fileIn.readUTF();
 					 
 					// break the string into message and recipient part 
 					StringTokenizer st = new StringTokenizer(command, "#"); 
@@ -189,11 +188,12 @@ public class Server {
 					{ 
 						if(!mc.name.equals(username))
 						{
-							mc.out.println("FILEACCEPT" + fileName + "from" + username);
+							mc.fileOut.writeUTF(fileName + "from" + username);
+							System.out.println("INSERT SERVER SIDE SENDING HERE");
 						}
 					} 
 						
-					System.out.println("INSERT SERVER SIDE SENDING HERE");
+					
 
                 //get the next command
             } catch (FileNotFoundException fnfe) {
