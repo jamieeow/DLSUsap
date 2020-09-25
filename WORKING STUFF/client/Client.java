@@ -2,8 +2,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Scanner;
+import java.io.File;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.EOFException;
+import java.io.FileInputStream;
 
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
@@ -13,6 +23,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 
 /**
  * A simple Swing-based client for the chat server. Graphically it is a frame
@@ -34,6 +48,12 @@ public class Client {
     int ip;
     Scanner in;
     PrintWriter out;
+    InputStream dis;
+    OutputStream dos;
+	private static Socket fileClient;
+    private static int filePort;
+    private static DataOutputStream fileOut;//writer to other client
+    private static DataInputStream fileIn;//reader from other client
     JFrame frame = new JFrame("Chatter");
     JTextField textField = new JTextField(50);
     JTextArea messageArea = new JTextArea(16, 50);
@@ -55,6 +75,7 @@ public class Client {
         send.add(fileButton);
         frame.getContentPane().add(send, BorderLayout.SOUTH);
         frame.getContentPane().add(new JScrollPane(messageArea), BorderLayout.CENTER);
+        frame.setTitle("DLSUsap");
         frame.pack();
 
         // Send on enter then clear to prepare for next message
@@ -62,6 +83,59 @@ public class Client {
             public void actionPerformed(ActionEvent e) {
                 out.println(textField.getText());
                 textField.setText("");
+            }
+        });
+
+        fileButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.addChoosableFileFilter(new FileNameExtensionFilter("Images", "jpg", "png", "gif", "bmp"));
+                chooser.addChoosableFileFilter(new FileNameExtensionFilter("*.txt", "txt"));
+                chooser.setAcceptAllFileFilterUsed(false);
+                if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+                    File fileToSend = chooser.getSelectedFile();
+                    if (fileToSend == null) {
+                        return;
+                    }
+					else {
+						//create a temporary thread get the file and send the file
+						new Thread(new Runnable() {
+
+							public void run() {
+								try {
+
+
+									byte[] data;
+
+									long fileLength = fileToSend.length();
+									if (fileLength < 0) {
+										throw new IOException("Invalid file size");
+									}
+
+									//send information about file name and length of file
+									String command = "\\file-" + getFileName(fileToSend.getAbsolutePath()) + "-" + fileLength + "\\";
+
+									fileOut.writeUTF(command);
+
+									DataInputStream fileReader = new DataInputStream(new FileInputStream(new File(fileToSend.getAbsolutePath())));//reads the file from users computer
+
+									data = new byte[(int) (fileLength)];
+
+									int read = fileReader.read(data);
+
+									fileOut.write(data, 0, read);//send to other user
+									
+
+								} catch (FileNotFoundException fnfe) {
+									//mainReference.error("Could not send file.");
+								} catch (EOFException eofe) {
+									//mainReference.error(eofe.getMessage());
+								} catch (IOException ioe) {
+								}
+							}
+						}).start();
+					}
+                }
             }
         });
     }
@@ -86,17 +160,29 @@ public class Client {
             var socket = new Socket(serverAddress, ip);
             in = new Scanner(socket.getInputStream());
             out = new PrintWriter(socket.getOutputStream(), true);
-
+            dis = socket.getInputStream();
+            dos = socket.getOutputStream();
             while (in.hasNextLine()) {
                 var line = in.nextLine();
                 if (line.startsWith("SUBMITNAME")) {
                     out.println(getName());
                 } else if (line.startsWith("NAMEACCEPTED")) {
-                    this.frame.setTitle("Chatter - " + line.substring(13));
+                    this.frame.setTitle("DlSUsap - " + line.substring(13));
                     textField.setEditable(true);
                     fileButton.setVisible(true);
                     frame.pack();
-                } else if (line.startsWith("MESSAGE")) {
+                } else if (line.startsWith("FILEPORT")) {
+                    filePort = Integer.parseInt(line.substring(9));
+					System.out.println(line.substring(9));
+					//create the connection with the file server
+					fileClient = new Socket(serverAddress, filePort);
+					//get the file streams
+					fileOut = new DataOutputStream(fileClient.getOutputStream());
+					fileIn = new DataInputStream(fileClient.getInputStream());
+					//create thread to detect and store incoming files
+					new Thread(new fileReaderThread()).start();
+					
+                }else if (line.startsWith("MESSAGE")) {
                     messageArea.append(line.substring(8) + "\n");
                 }
             }
@@ -108,6 +194,52 @@ public class Client {
             frame.setVisible(false);
             frame.dispose();
         }
+    }
+	
+	private static class fileReaderThread implements Runnable {
+        //create new thread to recieve commands and file data
+
+        public void run() {
+            try {
+                //get the original file command from the user
+                String command = fileIn.readUTF();
+                
+                //get the file size
+                int fileSize = Integer.parseInt(command.substring(command.lastIndexOf("-") + 1, command.length() - 1));
+                int dashIndex = command.indexOf("-");
+                String fileName = command.substring(dashIndex + 1, command.lastIndexOf("-"));
+
+               
+                //create new file object to store data
+
+                //make the file object and add to list
+                file tmp = new file(fileSize, fileName);
+                //files.add(tmp);
+                //fileModel.add(fileModel.getSize(), fileName);
+                
+                fileIn.read(tmp.getData());
+
+
+                //get the next command
+            } catch (FileNotFoundException fnfe) {
+               //mainReference.error("Could not read file.");
+            } catch (EOFException eofe) {
+                //mainReference.error(eofe.getMessage());
+            } catch (IOException ioe) {
+            }
+        }
+    }
+
+	
+    public String getFileName(String fileName) {
+        int dirSplitIndex = fileName.lastIndexOf("/");
+        if (dirSplitIndex == -1)//other slash for windows
+        {
+            dirSplitIndex = fileName.lastIndexOf("\\");
+        }
+        fileName = fileName.substring(dirSplitIndex + 1);
+
+        return fileName;
     }
 
     public static void main(String[] args) throws Exception {
