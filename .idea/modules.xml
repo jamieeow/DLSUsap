@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/DLSUsap.iml" filepath="$PROJECT_DIR$/.idea/DLSUsap.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JVFX NOT WORKING/JVFX NOT WORKING.iml" filepath="$PROJECT_DIR$/JVFX NOT WORKING/JVFX NOT WORKING.iml" />
+      <module fileurl="file://$PROJECT_DIR$/WORKING STUFF/WORKING STUFF.iml" filepath="$PROJECT_DIR$/WORKING STUFF/WORKING STUFF.iml" />
+    </modules>
+  </component>
+</project>

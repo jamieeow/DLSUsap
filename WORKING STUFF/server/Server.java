@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.EOFException;
 import java.util.Vector;
 import java.util.StringTokenizer;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * A multithreaded chat room server. When a client connects the server requests
@@ -34,6 +36,7 @@ public class Server {
     // The set of all the print writers for all the clients, used for broadcast.
     private static Set<PrintWriter> writers = new HashSet<>();
 	private static Vector<Handler> fileWriters = new Vector<>(); 
+	private final static int BUFFER_SIZE = 100;
 
 
     public static void main(String[] args) throws Exception {
@@ -56,11 +59,12 @@ public class Server {
         private PrintWriter out;
         private boolean image;
         private boolean text;
-		private ServerSocket fileServer;
-		private Socket fileClient;
-		private int filePort;
-		private DataOutputStream fileOut;//writer to other client
+		private static  ServerSocket fileServer;
+		private static int filePort;
+		private static  Socket fileClient;
+		private static DataOutputStream fileOut;//writer to other client
 		private static DataInputStream fileIn;//reader from other client
+		
 
         /**
          * Constructs a handler thread, squirreling away the socket. All the interesting
@@ -79,7 +83,7 @@ public class Server {
          */
         public void run() {
             try {
-				 filePort = 59002;
+				filePort = 59002;
 				//find a port for the fileserver
 				while (fileServer == null) {
 					try {
@@ -166,42 +170,44 @@ public class Server {
             try {
 					//get the original file command from the user
 					String command = Handler.fileIn.readUTF();
-					 
 					// break the string into message and recipient part 
 					StringTokenizer st = new StringTokenizer(command, "#"); 
 					String username = st.nextToken(); 
-					command = st.nextToken(); 
-	  
+					int userLength = username.length();
+					command = command.substring(userLength+1);
+					System.out.println(command);
 					//get the file size
 					int fileSize = Integer.parseInt(command.substring(command.lastIndexOf("-") + 1, command.length() - 1));
 					int dashIndex = command.indexOf("-");
 					String fileName = command.substring(dashIndex + 1, command.lastIndexOf("-"));
 
-				   
-					//create new file object to store data
-
-					//make the file object and add to list
-					file tmp = new file(fileSize, fileName);
-					//files.add(tmp);
-					//fileModel.add(fileModel.getSize(), fileName);
 					for (Handler mc : Server.fileWriters)  
 					{ 
 						if(!mc.name.equals(username))
-						{
-							mc.fileOut.writeUTF(fileName + "from" + username);
-							//>>INSERT FILE SENDING HERE
+						{		
+							System.out.print(username + "MAMA MO");
+							mc.fileOut.writeUTF(fileName + " " + fileSize + " " + username);
+                            /**
+                            * Read file contents
+                            */
+                            InputStream input = mc.fileClient.getInputStream();
+							OutputStream sendFile = mc.fileClient.getOutputStream();
+                            byte[] buffer = new byte[BUFFER_SIZE];
+                            int cnt;
+                            while ((cnt = input.read(buffer)) > 0) {
+                                sendFile.write(buffer, 0, cnt);
+                            }
+                            sendFile.flush();
+                            sendFile.close();
 						}
 					} 
-						
-					
-
                 //get the next command
             } catch (FileNotFoundException fnfe) {
-               fnfe.printStackTrace();
+               //fnfe.printStackTrace();
             } catch (EOFException eofe) {
-                 eofe.printStackTrace();
+                 //eofe.printStackTrace();
             } catch (IOException ioe) {
-				ioe.printStackTrace();
+				//ioe.printStackTrace();
             }	
 			finally{
 				new Thread(new fileReaderThread()).start();

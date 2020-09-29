@@ -14,6 +14,9 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.EOFException;
 import java.io.FileInputStream;
+import java.io.BufferedInputStream;
+import java.util.StringTokenizer;
+import java.io.FileOutputStream;
 
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
@@ -57,6 +60,8 @@ public class Client {
     JTextField textField = new JTextField(50);
     JTextArea messageArea = new JTextArea(16, 50);
     JButton fileButton = new JButton("File Button");
+	private static final int BUFFER_SIZE = 100;
+    
 
     /**
      * Constructs the client by laying out the GUI and registering a listener with
@@ -107,13 +112,28 @@ public class Client {
 									if (fileLength < 0) {
 										throw new IOException("Invalid file size");
 									}
-
 									//send information about file name and length of file
 									String command = username + "#\\file-" + getFileName(fileToSend.getAbsolutePath()) + "-" + fileLength + "\\";
-
 									fileOut.writeUTF(command);
-
-									byte[] myByteArray = new byte[(int) fileLength];								
+									
+									/** Create an stream **/
+									InputStream input = new FileInputStream(fileToSend);
+									OutputStream output = fileClient.getOutputStream();
+									// Read file
+									BufferedInputStream bis = new BufferedInputStream(input);
+									/** Creates a place to store file **/
+									byte[] buffer = new byte[BUFFER_SIZE];
+									int count, percent = 0;
+									while((count = bis.read(buffer)) > 0){
+										output.write(buffer, 0, count);
+									}
+									/* Update the AttachmentForm GUI*/
+									System.out.println("File has been sent!");
+									//JOptionPane.showMessageDialog(form, "File has been sent!", "Success", JOptionPane.INFORMATION_MESSAGE);
+									/* Close the send file */
+									output.flush();
+									output.close();
+									System.out.println("File has been sent!");									
 
 								} catch (FileNotFoundException fnfe) {
 									//mainReference.error("Could not send file.");
@@ -186,23 +206,57 @@ public class Client {
 	
 	private static class fileReaderThread implements Runnable {
         //create new thread to recieve commands and file data
-
+		protected StringTokenizer st;
         public void run() {
             try {
                 //get the original file command from the user
-                String sender = fileIn.readUTF();
-				//>>INSERT FILE RECEIVING HERE
-				int result = JOptionPane.showConfirmDialog(frame,"Do yo want a file?" + sender, "Swing Tester",
+                String data = fileIn.readUTF();
+				st = new StringTokenizer(data);
+				String filename = st.nextToken();
+                int filesize = Integer.parseInt(st.nextToken());
+                String consignee = st.nextToken(); // Get the Sender Username
+				int result = JOptionPane.showConfirmDialog(frame,"Do yo want a file? from " + consignee, "Swing Tester",
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 				if(result == JOptionPane.YES_OPTION){
-					//>>INSERT FILE SAVING HERE
+                    //main.setMyTitle("Loading File....");
+                    System.out.println("Loading File....");
+                    System.out.println("From: "+ consignee);
+					JFileChooser chooser = new JFileChooser();
+					//Insert File chooser
+					if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+						File fileToSave = chooser.getSelectedFile();
+						if (fileToSave == null) {
+                        return;
+						}
+						else {
+						String path =  fileToSave.getAbsolutePath() + filename;   
+						/*  Creat Stream   */
+						FileOutputStream fos = new FileOutputStream(path);
+						InputStream input = fileClient.getInputStream();                                
+						/*  Monitor Progress   */
+						//ProgressMonitorInputStream pmis = new ProgressMonitorInputStream(main, "Downloading file please wait...", input);
+						/*  Buffer   */
+						BufferedInputStream bis = new BufferedInputStream(input);
+						/**  Create a temporary file **/
+						byte[] buffer = new byte[BUFFER_SIZE];
+						int count, percent = 0;
+						while((count = bis.read(buffer)) != -1){
+							//percent = percent + count;
+							//int p = (percent / filesize);
+							//main.setMyTitle("Downloading File  "+ p +"%");
+							fos.write(buffer, 0, count);
+						}
+						fos.flush();
+						fos.close();
+						JOptionPane.showMessageDialog(null, "FIle downloaded \n'"+ path +"'");
+						System.out.println("Saved in: "+ path);
+						}
+					}
 				}else if (result == JOptionPane.NO_OPTION){
 					out.println("File Transfer Failed");
 				}else {
 					out.println("File Transfer Failed");
 				}
-
-				System.out.println("INSERT Receiving ERE");
                 //get the next command
             } catch (FileNotFoundException fnfe) {
                //mainReference.error("Could not read file.");
